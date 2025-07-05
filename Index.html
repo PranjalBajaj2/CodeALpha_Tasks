@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Credit Scoring Predictor</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+    body {
+      background-color: #f0f4f8;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      height: 100vh;
+      justify-content: center;
+      align-items: center;
+    }
+    .card {
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 420px;
+    }
+    h2 {
+      margin-bottom: 24px;
+      text-align: center;
+      color: #1f2937;
+    }
+    label {
+      font-weight: 600;
+      display: block;
+      margin: 16px 0 6px;
+      color: #374151;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+    button {
+      margin-top: 24px;
+      padding: 12px;
+      width: 100%;
+      background-color: #2563eb;
+      color: white;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #1d4ed8;
+    }
+    .result {
+      margin-top: 24px;
+      background-color: #ecfdf5;
+      padding: 16px;
+      border-radius: 8px;
+      text-align: center;
+      color: #065f46;
+      font-size: 18px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Creditworthiness Checker</h2>
+    <form id="credit-form">
+      <label for="income">Annual Income ($)</label>
+      <input type="number" id="income" required>
+
+      <label for="debt">Total Debt ($)</label>
+      <input type="number" id="debt" required>
+
+      <label for="history">Credit History (years)</label>
+      <input type="number" id="history" required>
+
+      <button type="submit">Predict Credit Score</button>
+    </form>
+    <div class="result" id="result-box"></div>
+  </div>
+
+  <script>
+    const form = document.getElementById("credit-form");
+    const resultBox = document.getElementById("result-box");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const data = {
+        AMT_INCOME_TOTAL: parseFloat(document.getElementById("income").value),
+        AMT_CREDIT_SUM: parseFloat(document.getElementById("debt").value),
+        DAYS_CREDIT: -365 * parseFloat(document.getElementById("history").value)
+      };
+
+      const response = await fetch("/predict", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(data)
+      });
+
+      const res = await response.json();
+      const label = res.prediction === 1 ? "✅ Creditworthy" : "⚠️ Likely to Default";
+      resultBox.innerHTML = `<strong>${label}</strong><br>Probability: ${res.probability}`;
+      resultBox.style.display = "block";
+    });
+  </script>
+</body>
+</html>
